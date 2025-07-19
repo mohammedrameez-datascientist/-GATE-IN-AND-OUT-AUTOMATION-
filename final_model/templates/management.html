@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Management Dashboard</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='header-logo.png') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(120deg, #e3f0ff 0%, #f7f7fa 100%);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .header-bar {
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(90deg, #1976d2 0%, #67b26f 100%);
+            color: #fff;
+            padding: 24px 0 18px 0;
+            text-align: center;
+            font-size: 2.1em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 12px #1976d233;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 400px;
+            background: linear-gradient(135deg, #1976d2 0%, #e7eaf6 100%);
+            padding: 32px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top-right-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 2px 0 16px #0001;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 40px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-btn {
+            width: 60%;
+            padding: 12px 2px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 12px;
+            background: none;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .sidebar-btn i {
+            font-size: 1em;
+        }
+
+        .sidebar-btn.active,
+        .sidebar-btn:hover {
+            background: #fff;
+            color: #1976d2;
+            box-shadow: 0 2px 8px #1976d233;
+            font-weight: 700;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 48px 16px 32px 16px;
+            background: none;
+        }
+
+        .container {
+            background: #fff;
+            padding: 32px 30px 30px 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 #1976d244;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 40px auto;
+            position: relative;
+        }
+
+        .section-header {
+            color: #1b5e20;
+            font-size: 1.5em;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            position: relative;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input[type="text"],
+        .search-bar input[type="date"] {
+            padding: 10px 14px;
+            border: 1px solid #b2dfdb;
+            border-radius: 6px;
+            font-size: 1em;
+            outline: none;
+        }
+
+        .search-bar input[type="date"] {
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .search-bar input[type="date"]:focus {
+            border: 1.5px solid #1976d2;
+        }
+
+        .search-bar select {
+            padding: 10px 14px;
+            border: 1px solid #b2dfdb;
+            border-radius: 6px;
+            font-size: 1em;
+            outline: none;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .search-bar select:focus {
+            border: 1.5px solid #1976d2;
+        }
+
+        .search-bar button {
+            background: #438d48;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .search-bar button:hover {
+            background: #388e3c;
+            transform: translateY(-2px) scale(1.03);
+        }
+
+        .search-bar .print-btn {
+            background: #1976d2;
+        }
+
+        .search-bar .print-btn:hover {
+            background: #1256a3;
+        }
+
+        .search-bar .weekly-btn {
+            background: #388e3c;
+        }
+
+        .search-bar .weekly-btn:hover {
+            background: #2e7d32;
+        }
+
+        .search-bar .clear-btn {
+            background: #d32f2f;
+        }
+
+        .search-bar .clear-btn:hover {
+            background: #c61e1e;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 40px;
+            left: 0;
+            background: #fff;
+            border: 1px solid #b2dfdb;
+            border-radius: 6px;
+            width: 220px;
+            max-height: 140px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .suggestion-item:hover {
+            background: #e3f2fd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px #1976d211;
+        }
+
+        th,
+        td {
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #e3f2fd;
+            color: #1976d2;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        tr:hover {
+            background: #e3f0ff;
+            transition: background 0.2s;
+        }
+
+        .msg {
+            margin-top: 18px;
+            color: #2e7d32;
+            font-weight: 500;
+            min-height: 24px;
+            text-align: center;
+        }
+
+        .staff-count {
+            margin: 10px 0 0 0;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .logout-btn {
+            position: fixed;
+            left: 24px;
+            bottom: 24px;
+            background: #1976d2;
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            font-size: 1.15em;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #67b26f;
+            color: #fff;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 24px #67b26f44;
+        }
+
+        .corner-logo {
+            width: 300px;
+            margin: 18px 0 0 24px;
+            opacity: 0.96;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 8px #0002);
+            position: static;
+            left:2px;
+            top: unset;
+            z-index: unset;
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .main-content {
+                padding: 18px 6px;
+            }
+        }
+
+        .dashboard-cards {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            margin: 0 0 18px 0;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px 0 #1976d211;
+            padding: 18px 28px 12px 28px;
+            min-width: 180px;
+            text-align: center;
+            transition: box-shadow 0.2s;
+            
+        }
+
+        .card .stat {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            transition: color 0.3s;
+            
+        }
+
+        .card.blue .stat {
+            color: #007bff;
+        }
+
+        .card.green .stat {
+            color: #2ecc40;
+        }
+
+        .card.red .stat {
+            color: #ff2d2d;
+        }
+
+        .card .label {
+            color: #666;
+            font-size: 1.05em;
+        }
+
+        @media (max-width: 600px) {
+            .corner-logo {
+                width: 300px;
+                left: 20px;
+                top: 5px;
+
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-bar">
+        <i class="fa-solid fa-briefcase"></i> Management Dashboard
+    </div>
+    <div class="layout">
+        <div class="sidebar">
+            <img src="{{ url_for('static', filename='college logo.png') }}" alt="College Logo" class="corner-logo">
+            <h2>Management</h2>
+            <button class="sidebar-btn" type="button" onclick="showSection('dashboard')">
+                <i class="fa-solid fa-door-open"></i> Gate Records
+            </button>
+            <button class="sidebar-btn" type="button" onclick="showSection('staffGate')">
+                <i class="fa-solid fa-id-card"></i> Staff Records
+            </button>
+            <button class="sidebar-btn" type="button" onclick="showSection('studentGate')">
+                <i class="fa-solid fa-user-graduate"></i> Student Records
+            </button>
+            <a href="{{ url_for('logout') }}" class="logout-btn" style="margin-top:auto;"><i class="fa fa-sign-out-alt"></i>
+                Logout</a>
+        </div>
+        <div class="main-content">
+            
+            <div id="dashboardSection">
+                <div class="container" id="printArea">
+                    <div class="section-header">Gate Records (All)</div>
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="ID / Name" autocomplete="off"
+                            oninput="showSuggestions()">
+                        <input type="date" id="startDateFilter" placeholder="Start Date" onchange="searchRecords()">
+                        <input type="date" id="endDateFilter" placeholder="End Date" onchange="searchRecords()">
+                        <select id="statusFilter" onchange="searchRecords()">
+                            <option value="">All Status</option>
+                            <option value="inside">Inside</option>
+                            <option value="exited">Exited</option>
+                        </select>
+                        <div id="suggestions" class="suggestions" style="display:none;"></div>
+                        <button onclick="searchRecords()">Search</button>
+                        <button onclick="clearFilters()" class="clear-btn">Clear Filters</button>
+                        <button onclick="showWeeklyRecords()" class="weekly-btn">Weekly Gate Records</button>
+                        <button onclick="window.print()" class="print-btn">Print</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Entry Time</th>
+                                <th>Exit Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody">
+                            <tr>
+                                <td colspan="6">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="managementMsg" class="msg"></div>
+                </div>
+            </div>
+            <div id="staffGateSection" style="display:none;">
+                <div class="dashboard-cards" style="margin-bottom: 18px;">
+                    <div class="card blue">
+                        <div class="stat" id="statStaffInside">0</div>
+                        <div class="label">Currently Inside</div>
+                    </div>
+                    <div class="card green">
+                        <div class="stat" id="statStaffEntries">0</div>
+                        <div class="label">Total Entries Today</div>
+                    </div>
+                    <div class="card red">
+                        <div class="stat" id="statStaffExits">0</div>
+                        <div class="label">Total Exits Today</div>
+                    </div>
+                </div>
+                <div class="container" id="staffPrintArea">
+                    <div class="section-header">Staff Records</div>
+                    <div class="search-bar">
+                        <input type="text" id="staffGateSearchInput" placeholder="Search by ID or Name" oninput="searchStaffGateRecords()">
+                        <button onclick="showWeeklyStaffGateRecords()" class="weekly-btn">Weekly Staff Records</button>
+                        <button onclick="printSection('staffPrintArea')" class="print-btn">Print</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Entry Time</th>
+                                <th>Exit Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffGateRecordsTableBody">
+                            <tr><td colspan="6">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                    <div id="staffGateMsg" class="msg"></div>
+                </div>
+                <div class="container">
+                    <div class="section-header">All Staff Details</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allStaffDetailsTableBody">
+                            <tr><td colspan="4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="studentGateSection" style="display:none;">
+                <div class="container" id="studentPrintArea">
+                    <div class="section-header">Student Records</div>
+                    <div class="search-bar">
+                        <input type="text" id="studentGateSearchInput" placeholder="Search by ID or Name" oninput="searchStudentGateRecords()">
+                        <button onclick="showWeeklyStudentGateRecords()" class="weekly-btn">Weekly Student Records</button>
+                        <button onclick="printSection('studentPrintArea')" class="print-btn">Print</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Entry Time</th>
+                                <th>Exit Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentGateRecordsTableBody">
+                            <tr><td colspan="6">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                    <div id="studentGateMsg" class="msg"></div>
+                </div>
+                <div class="container">
+                    <div class="section-header">All Student Details</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Barcode ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allStudentDetailsTableBody">
+                            <tr><td colspan="4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setDefaultDates();
+            fetchAllStaff();
+            fetchRecords();
+            fetchStaffGateRecords();
+            fetchStudentGateRecords();
+            fetchStaffStatsToday();
+        });
+
+        // Sidebar navigation logic
+        function showSection(section) {
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('staffGateSection').style.display = 'none';
+            document.getElementById('studentGateSection').style.display = 'none';
+            var btns = document.getElementsByClassName('sidebar-btn');
+            for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+            if (section === 'staffGate') {
+                document.getElementById('staffGateSection').style.display = '';
+                btns[1].classList.add('active');
+                fetchAllStaffDetails();
+                fetchStaffStatsToday(); // <-- Add this line
+            } else if (section === 'studentGate') {
+                document.getElementById('studentGateSection').style.display = '';
+                btns[2].classList.add('active');
+                fetchAllStudentDetails();
+            } else {
+                document.getElementById('dashboardSection').style.display = '';
+                btns[0].classList.add('active');
+            }
+        }
+        // Fetch and display all staff
+        function fetchAllStaff() {
+            fetch('/api/staff')
+                .then(res => res.json())
+                .then(data => {
+                    allStaff = data;
+                    document.getElementById('allStaffTableBody').innerHTML = data.length === 0
+                        ? '<tr><td colspan="4">No staff found</td></tr>'
+                        : data.map(staff =>
+                            `<tr>
+                                <td>${staff.id}</td>
+                                <td>${staff.name}</td>
+                                <td>${staff.department}</td>
+                                <td>${staff.role}</td>
+                            </tr>`
+                        ).join('');
+                    document.getElementById('staffCount').textContent = `Total Staff: ${data.length}`;
+                })
+                .catch(() => {
+                    document.getElementById('allStaffTableBody').innerHTML = '<tr><td colspan="4">Error loading staff</td></tr>';
+                });
+        }
+        // Fetch and display today's gate records
+        function fetchRecords() {
+            fetch('/api/gate/records')
+                .then(res => res.json())
+                .then(records => {
+                    const startDate = document.getElementById('startDateFilter').value;
+                    const endDate = document.getElementById('endDateFilter').value;
+                    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+                    const statusFilter = document.getElementById('statusFilter').value;
+                    
+                    let filtered = records;
+                    
+                    // Date range filtering
+                    if (startDate && endDate) {
+                        filtered = filtered.filter(r => {
+                            if (!r.entry_time) return false;
+                            const entryDate = r.entry_time.split('T')[0];
+                            return entryDate >= startDate && entryDate <= endDate;
+                        });
+                    } else if (startDate) {
+                        filtered = filtered.filter(r => {
+                            if (!r.entry_time) return false;
+                            const entryDate = r.entry_time.split('T')[0];
+                            return entryDate >= startDate;
+                        });
+                    } else if (endDate) {
+                        filtered = filtered.filter(r => {
+                            if (!r.entry_time) return false;
+                            const entryDate = r.entry_time.split('T')[0];
+                            return entryDate <= endDate;
+                        });
+                    } else {
+                        // Default to today if no date filters
+                        const today = new Date().toISOString().slice(0, 10);
+                        filtered = filtered.filter(r => r.entry_time && r.entry_time.startsWith(today));
+                    }
+                    
+                    // Search filter
+                    if (search) {
+                        filtered = filtered.filter(r =>
+                            (r.staff_id || '').toLowerCase().includes(search) ||
+                            (r.name || '').toLowerCase().includes(search)
+                        );
+                    }
+                    
+                    // Status filter
+                    if (statusFilter) {
+                        if (statusFilter === 'inside') {
+                            filtered = filtered.filter(r => !r.exit_time);
+                        } else if (statusFilter === 'exited') {
+                            filtered = filtered.filter(r => r.exit_time);
+                        }
+                    }
+                    
+                    document.getElementById('recordsTableBody').innerHTML = filtered.length === 0
+                        ? '<tr><td colspan="6">No records found</td></tr>'
+                        : filtered.map(r =>
+                            `<tr>
+                                <td>${r.staff_id}</td>
+                                <td>${r.name}</td>
+                                <td>${r.department}</td>
+                                <td>${r.entry_time ? new Date(r.entry_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '-'}</td>
+                                <td>${r.exit_time ? new Date(r.exit_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '-'}</td>
+                                <td style="font-weight:bold; color:${r.exit_time ? '#388e3c' : '#d32f2f'}">
+                                    ${r.exit_time ? 'Exited' : 'Inside'}
+                                </td>
+                            </tr>`
+                        ).join('');
+                    
+                    // Update message
+                    let message = `Showing ${filtered.length} records`;
+                    if (startDate && endDate) {
+                        message += ` from ${startDate} to ${endDate}`;
+                    } else if (startDate) {
+                        message += ` from ${startDate}`;
+                    } else if (endDate) {
+                        message += ` until ${endDate}`;
+                    } else {
+                        message += ` for today`;
+                    }
+                    if (statusFilter) {
+                        message += ` (${statusFilter})`;
+                    }
+                    
+                    document.getElementById('managementMsg').textContent = message;
+                })
+                .catch(() => {
+                    document.getElementById('recordsTableBody').innerHTML = '<tr><td colspan="6">Error loading records</td></tr>';
+                });
+        }
+        // Weekly records
+        function showWeeklyRecords() {
+            fetch('/api/gate/records/weekly')
+                .then(res => res.json())
+                .then(records => {
+                    if (records.error) {
+                        document.getElementById('managementMsg').textContent = records.error;
+                        document.getElementById('managementMsg').classList.remove('success');
+                        return;
+                    }
+                    document.getElementById('recordsTableBody').innerHTML = records.length === 0
+                        ? '<tr><td colspan="6">No records found for the past week</td></tr>'
+                        : records.map(r => {
+                            const entryTime = new Date(r.entry_time);
+                            const exitTime = r.exit_time ? new Date(r.exit_time) : null;
+                            return `<tr>
+                                <td>${r.staff_id}</td>
+                                <td>${r.name}</td>
+                                <td>${r.department}</td>
+                                <td>${entryTime.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</td>
+                                <td>${exitTime ? exitTime.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '-'}</td>
+                                <td style="font-weight:bold; color:${r.exit_time ? '#388e3c' : '#d32f2f'}">
+                                    ${r.exit_time ? 'Exited' : 'Inside'}
+                                </td>
+                            </tr>`;
+                        }).join('');
+                    document.getElementById('managementMsg').textContent =
+                        `Showing ${records.length} records from the past week`;
+                    document.getElementById('managementMsg').classList.add('success');
+                })
+                .catch(() => {
+                    document.getElementById('recordsTableBody').innerHTML =
+                        '<tr><td colspan="6">Error loading weekly records</td></tr>';
+                    document.getElementById('managementMsg').textContent =
+                        'Error loading weekly records';
+                    document.getElementById('managementMsg').classList.remove('success');
+                });
+        }
+        // Live search suggestions
+        function showSuggestions() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const suggestionsDiv = document.getElementById('suggestions');
+            if (!input) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+            const matches = allStaff.filter(s =>
+                s.id.toLowerCase().includes(input) ||
+                s.name.toLowerCase().includes(input)
+            ).slice(0, 5);
+            if (matches.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+            suggestionsDiv.innerHTML = matches.map(s =>
+                `<div class="suggestion-item" onclick="selectSuggestion('${s.id}', '${s.name}')">${s.id} - ${s.name}</div>`
+            ).join('');
+            suggestionsDiv.style.display = 'block';
+        }
+        function selectSuggestion(id, name) {
+            document.getElementById('searchInput').value = id;
+            document.getElementById('suggestions').style.display = 'none';
+            fetchRecords();
+        }
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-bar')) {
+                document.getElementById('suggestions').style.display = 'none';
+            }
+        });
+        document.getElementById('searchInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                fetchRecords();
+            }
+        });
+        document.getElementById('startDateFilter').addEventListener('change', fetchRecords);
+        document.getElementById('endDateFilter').addEventListener('change', fetchRecords);
+        document.getElementById('statusFilter').addEventListener('change', fetchRecords);
+        // Staff/Student gate records data cache
+        let staffGateRecordsCache = [];
+        let studentGateRecordsCache = [];
+
+        function fetchStaffGateRecords() {
+            fetch('/api/gate/records/staff')
+                .then(res => res.json())
+                .then(records => {
+                    staffGateRecordsCache = records;
+                    renderStaffGateRecords(records);
+                    document.getElementById('staffGateMsg').textContent = `Showing ${records.length} staff gate records`;
+                })
+                .catch(() => {
+                    document.getElementById('staffGateRecordsTableBody').innerHTML = '<tr><td colspan="6">Error loading staff gate records</td></tr>';
+                    document.getElementById('staffGateMsg').textContent = 'Error loading staff gate records';
+                });
+        }
+        function renderStaffGateRecords(records) {
+            const search = document.getElementById('staffGateSearchInput').value.trim().toLowerCase();
+            let filtered = records;
+            if (search) {
+                filtered = records.filter(r =>
+                    (r.staff_id || '').toLowerCase().includes(search) ||
+                    (r.name || '').toLowerCase().includes(search)
+                );
+            }
+            document.getElementById('staffGateRecordsTableBody').innerHTML = filtered.length === 0
+                ? '<tr><td colspan="6">No staff gate records found</td></tr>'
+                : filtered.map(r => {
+                    const entryTime = new Date(r.entry_time);
+                    const exitTime = r.exit_time ? new Date(r.exit_time) : null;
+                    return `<tr>
+                        <td>${r.staff_id}</td>
+                        <td>${r.name}</td>
+                        <td>${r.department}</td>
+                        <td>${entryTime.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</td>
+                        <td>${exitTime ? exitTime.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '-'}</td>
+                        <td style="font-weight:bold; color:${r.exit_time ? '#388e3c' : '#d32f2f'}">${r.exit_time ? 'Exited' : 'Inside'}</td>
+                    </tr>`;
+                }).join('');
+        }
+        function searchStaffGateRecords() {
+            renderStaffGateRecords(staffGateRecordsCache);
+        }
+        function showWeeklyStaffGateRecords() {
+            fetch('/api/gate/records/staff')
+                .then(res => res.json())
+                .then(records => {
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    const weekly = records.filter(r => new Date(r.entry_time) >= oneWeekAgo);
+                    staffGateRecordsCache = weekly;
+                    renderStaffGateRecords(weekly);
+                    document.getElementById('staffGateMsg').textContent = `Showing ${weekly.length} staff gate records from the past week`;
+                })
+                .catch(() => {
+                    document.getElementById('staffGateRecordsTableBody').innerHTML = '<tr><td colspan="6">Error loading weekly staff gate records</td></tr>';
+                    document.getElementById('staffGateMsg').textContent = 'Error loading weekly staff gate records';
+                });
+        }
+        function fetchStudentGateRecords() {
+            fetch('/api/gate/records/students')
+                .then(res => res.json())
+                .then(records => {
+                    studentGateRecordsCache = records;
+                    renderStudentGateRecords(records);
+                    document.getElementById('studentGateMsg').textContent = `Showing ${records.length} student gate records`;
+                })
+                .catch(() => {
+                    document.getElementById('studentGateRecordsTableBody').innerHTML = '<tr><td colspan="6">Error loading student gate records</td></tr>';
+                    document.getElementById('studentGateMsg').textContent = 'Error loading student gate records';
+                });
+        }
+        function renderStudentGateRecords(records) {
+            const search = document.getElementById('studentGateSearchInput').value.trim().toLowerCase();
+            let filtered = records;
+            if (search) {
+                filtered = records.filter(r =>
+                    (r.staff_id || '').toLowerCase().includes(search) ||
+                    (r.name || '').toLowerCase().includes(search)
+                );
+            }
+            document.getElementById('studentGateRecordsTableBody').innerHTML = filtered.length === 0
+                ? '<tr><td colspan="6">No student gate records found</td></tr>'
+                : filtered.map(r => {
+                    const entryTime = new Date(r.entry_time);
+                    const exitTime = r.exit_time ? new Date(r.exit_time) : null;
+                    return `<tr>
+                        <td>${r.staff_id}</td>
+                        <td>${r.name}</td>
+                        <td>${r.department}</td>
+                        <td>${entryTime.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</td>
+                        <td>${exitTime ? exitTime.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '-'}</td>
+                        <td style="font-weight:bold; color:${r.exit_time ? '#388e3c' : '#d32f2f'}">${r.exit_time ? 'Exited' : 'Inside'}</td>
+                    </tr>`;
+                }).join('');
+        }
+        function searchStudentGateRecords() {
+            renderStudentGateRecords(studentGateRecordsCache);
+        }
+        function showWeeklyStudentGateRecords() {
+            fetch('/api/gate/records/students')
+                .then(res => res.json())
+                .then(records => {
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    const weekly = records.filter(r => new Date(r.entry_time) >= oneWeekAgo);
+                    studentGateRecordsCache = weekly;
+                    renderStudentGateRecords(weekly);
+                    document.getElementById('studentGateMsg').textContent = `Showing ${weekly.length} student gate records from the past week`;
+                })
+                .catch(() => {
+                    document.getElementById('studentGateRecordsTableBody').innerHTML = '<tr><td colspan="6">Error loading weekly student gate records</td></tr>';
+                    document.getElementById('studentGateMsg').textContent = 'Error loading weekly student gate records';
+                });
+        }
+        function fetchStaffStatsToday() {
+            fetch('/api/gate/records/staff/stats/today')
+                .then(res => res.json())
+                .then(stats => {
+                    document.getElementById('statStaffInside').textContent = stats.current_inside;
+                    document.getElementById('statStaffEntries').textContent = stats.total_entries;
+                    document.getElementById('statStaffExits').textContent = stats.total_exits;
+                });
+        }
+        function renderAllStaffDetails(data) {
+            document.getElementById('allStaffDetailsTableBody').innerHTML = data.length === 0
+                ? '<tr><td colspan="4">No staff found</td></tr>'
+                : data.map(staff =>
+                    `<tr>
+                        <td>${staff.id}</td>
+                        <td>${staff.name}</td>
+                        <td>${staff.department}</td>
+                        <td>${staff.role}</td>
+                    </tr>`
+                ).join('');
+        }
+        function fetchAllStaffDetails() {
+            fetch('/api/staff')
+                .then(res => res.json())
+                .then(renderAllStaffDetails)
+                .catch(() => {
+                    document.getElementById('allStaffDetailsTableBody').innerHTML = '<tr><td colspan="4">Error loading staff</td></tr>';
+                });
+        }
+        function renderAllStudentDetails(data) {
+            document.getElementById('allStudentDetailsTableBody').innerHTML = data.length === 0
+                ? '<tr><td colspan="4">No students found</td></tr>'
+                : data.map(student =>
+                    `<tr>
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.year}</td>
+                        <td>${student.department}</td>
+                    </tr>`
+                ).join('');
+        }
+        function fetchAllStudentDetails() {
+            fetch('/api/students')
+                .then(res => res.json())
+                .then(renderAllStudentDetails)
+                .catch(() => {
+                    document.getElementById('allStudentDetailsTableBody').innerHTML = '<tr><td colspan="4">Error loading students</td></tr>';
+                });
+        }
+        function printSection(sectionId) {
+            var printContents = document.getElementById(sectionId).innerHTML;
+            var originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload(); // Reload to restore event listeners and state
+        }
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('suggestions').style.display = 'none';
+            fetchRecords();
+        }
+        // Set default dates (today)
+        function setDefaultDates() {
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('startDateFilter').value = today;
+            document.getElementById('endDateFilter').value = today;
+        }
+    </script>
+</body>
+
+</html>

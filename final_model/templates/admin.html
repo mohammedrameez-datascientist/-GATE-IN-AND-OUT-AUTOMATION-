@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <link rel="icon" href="{{ url_for('static', filename='header-logo.png') }}" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(120deg, #e3f0ff 0%, #f7f7fa 100%);
+            color: #222;
+        }
+        .header-bar {
+            width: 100%;
+            background: linear-gradient(90deg, #1976d2 0%, #67b26f 100%);
+            color: #fff;
+            padding: 24px 0 18px 0;
+            text-align: center;
+            font-size: 2.1em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 12px #1976d233;
+        }
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 400px;
+            background: linear-gradient(135deg, #1976d2 0%, #e7eaf6 100%);
+            padding: 32px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top-right-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 2px 0 16px #0001;
+        }
+        .sidebar h2 {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 40px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .sidebar-btn {
+            width: 60%;
+            padding: 14px 2px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 12px;
+            background: none;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .sidebar-btn i {
+            font-size: 1.2em;
+        }
+        .sidebar-btn.active, .sidebar-btn:hover {
+            background: #fff;
+            color: #1976d2;
+            box-shadow: 0 2px 8px #1976d233;
+            font-weight: 700;
+        }
+        .sidebar-submenu {
+            width: 60%;
+            margin: 0 0 0 18px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .sidebar-sub-btn {
+            background: #e7eaf6;
+            color: #1976d2;
+            font-size: 1em;
+            margin: 2px 0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            text-align: left;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .sidebar-sub-btn.active, .sidebar-sub-btn:hover {
+            background: #1976d2;
+            color: #fff;
+            box-shadow: 0 2px 8px #1976d233;
+        }
+        .main-content {
+            flex: 1;
+            padding: 48px 16px 32px 16px;
+            background: none;
+        }
+        .container {
+            max-width: 90%;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px #1976d244;
+            padding: 32px 28px 28px 28px;
+            position: relative;
+        }
+        .section {
+            margin-bottom: 36px;
+            padding: 24px 24px 18px 24px;
+            border-radius: 16px;
+            background: #f8fbff;
+            box-shadow: 0 2px 12px #b8d8f733;
+            border: none;
+        }
+        .section:last-child { border-bottom: none; }
+        .section h3 { color: #1976d2; margin-bottom: 16px; }
+        .input-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 4px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 7px;
+            border: 1px solid #bbb;
+            font-size: 1em;
+        }
+        button, .sidebar-btn, .sidebar-sub-btn {
+            min-width: 120px;
+        }
+        .msg {
+            margin-top: 10px;
+            min-height: 18px;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        table {
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+            margin-top: 18px;
+            overflow-x: auto;
+            display:inline-table;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #1976d211;
+            text-align: center;
+        }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background: #f0f4fa; }
+        tr:hover { background: #e3f0ff; transition: background 0.2s; }
+        .logout-btn {
+            position: fixed;
+            left: 24px;
+            bottom: 24px;
+            background: #1976d2;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        .logout-btn:hover { background: #67b26f; color: #fff; }
+        .toggle-btn {
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0 8px;
+            transition: background 0.2s;
+        }
+        .toggle-btn.active, .toggle-btn:hover {
+            background: #1256a3;
+        }
+        .corner-logo {
+            
+            left: 24px;
+            top: 24px;
+            width: 300px;
+            height: auto;
+            z-index: 0;
+            opacity: 0.96;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 8px #0002);
+        }
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: linear-gradient(135deg, #1976d2 0%, #67b26f 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            box-shadow: 0 4px 16px #1976d244;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 200;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .fab:hover {
+            background: #67b26f;
+            color: #fff;
+            box-shadow: 0 8px 24px #67b26f44;
+        }
+        @media (max-width: 900px) {
+            .sidebar { width: 60px; padding: 16px 0 0 0; }
+            .sidebar h2, .sidebar-btn span { display: none; }
+            .sidebar-btn { justify-content: center; }
+            .main-content { padding: 24px 2vw 16px 2vw; }
+            .container { max-width: 99%; padding: 16px 6px 16px 6px; }
+            .corner-logo { width: 60px; left: 4px; top: 4px; }
+            table {
+                width: 100%;
+            }
+        }
+        @media (max-width: 600px) {
+            .sidebar { width: 48px; }
+            .container { padding: 8px 2px; }
+            .header-bar { font-size: 1.2em; padding: 12px 0; }
+        }
+        .hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <i class="fa-solid fa-user-shield"></i> Admin Panel
+    </div>
+    <button id="sidebarToggle" style="position:fixed;top:18px;left:18px;z-index:200;background:#1976d2;color:#fff;border:none;padding:10px 14px;border-radius:8px;display:none;">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="layout">
+        <div class="sidebar">
+            <img src="{{ url_for('static', filename='college logo.png') }}" alt="College Logo" class="corner-logo">
+            <h2>Admin</h2>
+            <button id="staffBtn" class="sidebar-btn" type="button" onclick="showSection('staff')">
+                <i class="fa-solid fa-users"></i> <span>Staff Management</span>
+            </button>
+            <button id="studentBtn" class="sidebar-btn" type="button" onclick="showSection('student')">
+                <i class="fa-solid fa-user-graduate"></i> <span>Student Management</span>
+            </button>
+            <button id="staffDetailsBtn" class="sidebar-btn" type="button" onclick="showSection('staffDetails', this)">
+                <i class="fa-solid fa-id-card"></i> <span>Staff Details</span>
+            </button>
+            <button id="studentDetailsBtn" class="sidebar-btn" type="button" onclick="toggleSubmenu('studentSubmenu', this)">
+                <i class="fa-solid fa-list"></i> <span>Student Details</span>
+            </button>
+            <div id="studentSubmenu" class="sidebar-submenu">
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('AIML', this)"><i class="fa-solid fa-robot"></i> AIML</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('CSE', this)"><i class="fa-solid fa-laptop-code"></i> CSE</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('ECE', this)"><i class="fa-solid fa-microchip"></i> ECE</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('EEE', this)"><i class="fa-solid fa-bolt"></i> EEE</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('IT', this)"><i class="fa-solid fa-network-wired"></i> IT</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('AIDS', this)"><i class="fa-solid fa-dna"></i> AIDS</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('CYBERSECURITY', this)"><i class="fa-solid fa-shield-halved"></i> CYBER SECURITY</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('MECH', this)"><i class="fa-solid fa-cogs"></i> MECH</button>
+                <button class="sidebar-sub-btn" type="button" onclick="showDepartment('CIVIL', this)"><i class="fa-solid fa-building"></i> CIVIL</button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div style="background:#e3f0ff;padding:12px 24px;border-radius:8px;margin-bottom:24px;">
+                <strong>Welcome, Admin!</strong> Manage your college records efficiently.
+            </div>
+            <div class="container">
+                <h2>Admin Dashboard</h2>
+                <p>Welcome! Use the sidebar to manage staff and students. Select a section to get started.</p>
+                <div class="section" id="staffSection" style="display:none;">
+                    <h3>Manage Staff</h3>
+                    <form id="addStaffForm">
+                        <div class="input-group">
+                            <label for="staffName">Staff Name</label>
+                            <input type="text" id="staffName" name="staffName" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="staffId">Staff ID</label>
+                            <input type="text" id="staffId" name="staffId" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="staffDept">Department</label>
+                            <input type="text" id="staffDept" name="staffDept" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="staffRole">Role</label>
+                            <input type="text" id="staffRole" name="staffRole" required>
+                        </div>
+                        <button type="submit"style="background:#1976d2;color:#fff;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-weight:600;margin-top:8px;">Add Staff</button>
+                        <div class="msg" id="addStaffMsg"></div>
+                    </form>
+                    <form id="removeStaffForm" style="margin-top:18px;">
+                        <div class="input-group">
+                            <label for="removeStaffId">Staff ID</label>
+                            <input type="text" id="removeStaffId" name="removeStaffId" required>
+                        </div>
+                        <button type="submit"style="background:#1976d2;color:#fff;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-weight:600;margin-top:8px;">Remove Staff</button>
+                        <div class="msg" id="removeStaffMsg"></div>
+                    </form>
+                </div>
+                <div class="section" id="staffDetailsSection" style="display:none; margin-top:18px;">
+                    <h4>All Staff</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Staff ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="section" id="studentSection" style="display:none;">
+                    <h3>Manage Students</h3>
+                    <form id="addStudentForm">
+                        <div class="input-group">
+                            <label for="studentName">Student Name</label>
+                            <input type="text" id="studentName" name="studentName" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="rollNo">Roll No</label>
+                            <input type="text" id="rollNo" name="rollNo" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="year" >Year</label>
+                            <select id="year" name="year" required>
+                                <option value="">Select Year</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="dept">Department</label>
+                            <select id="dept" name="dept" required>
+                                <option value="">Select Department</option>
+                                <option value="AIML">AIML</option>
+                                <option value="CSE">CSE</option>
+                                <option value="ECE">ECE</option>
+                                <option value="EEE">EEE</option>
+                                <option value="IT">IT</option>
+                                <option value="AIDS">AIDS</option>
+                                <option value="CYBERSECURITY">CYBER SECURITY</option>
+                                <option value="MECH">MECH</option>
+                                <option value="CIVIL">CIVIL</option>
+                            </select>
+                        </div>
+                        <button type="submit"style="background:#1976d2;color:#fff;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-weight:600;margin-top:8px;">Add Student</button>
+                        <div class="msg" id="addStudentMsg"></div>
+                    </form>
+                    <form id="removeStudentForm" style="margin-top:18px;">
+                        <div class="input-group">
+                            <label for="removeRollNo">Roll No</label>
+                            <input type="text" id="removeRollNo" name="removeRollNo" required>
+                        </div>
+                        <button type="submit"style="background:#1976d2;color:#fff;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-weight:600;margin-top:8px;">Remove Student</button>
+                        <div class="msg" id="removeStudentMsg"></div>
+                    </form>
+                </div>
+                <div class="section" id="studentDetailsSection" style="display:none; margin-top:18px;">
+                    <h4>All Students</h4>
+                    <input type="text" id="studentFilterInput" placeholder="Filter by name, roll no, or department..." style="margin-bottom:12px; width:60%; padding:8px; border-radius:6px; border:1px solid #bbb;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="teachingStaffsSection" class="section" style="display:none;">
+                    <h3>Teaching Staffs</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachingStaffsTableBody">
+                            <!-- Teaching staff rows will be inserted here by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="nonTeachingStaffsSection" class="section" style="display:none;">
+                    <h3>Non-Teaching Staffs</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nonTeachingStaffsTableBody">
+                            <!-- Non-teaching staff rows will be inserted here by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="AIMLSection" class="section" style="display:none;">
+                    <h3>AIML Students</h3>
+                    <table>
+                        <thead>
+                            <tr><th>ID</th><th>Name</th><th>Year</th><th>Department</th></tr>
+                        </thead>
+                        <tbody id="AIMLTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="CSESection" class="section" style="display:none;">
+                    <h3>CSE Students</h3>
+                    <table>
+                        <thead>
+                            <tr><th>ID</th><th>Name</th><th>Year</th><th>Department</th></tr>
+                        </thead>
+                        <tbody id="CSETableBody"></tbody>
+                    </table>
+                </div>
+                <div id="ECESection" class="section" style="display:none;">
+                    <h3>ECE Students</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ECETableBody"></tbody>
+                    </table>
+                </div>
+                <div id="EEESection" class="section" style="display:none;">
+                    <h3>EEE Students</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="EEETableBody"></tbody>
+                    </table>
+                </div>
+                <div id="ITSection" class="section" style="display:none;">
+                    <h3>IT Students</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ITTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="AIDSSection" class="section" style="display:none;">
+                    <h3>AIDS Students</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="AIDSTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="CYBERSECURITYSection" class="section" style="display:none;">
+                    <h3>CYBER SECURITY Students</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="CYBERSECURITYTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="MECHSection" class="section" style="display:none;">
+                    <h3>MECH Students</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="MECHTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="CIVILSection" class="section" style="display:none;">
+                    <h3>CIVIL Students</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody id="CIVILTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    <script>
+        // Fetch and display all staff
+        function fetchAllStaff() {
+            fetch('/api/staff')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('staffTableBody');
+                    tbody.innerHTML = '';
+                    data.forEach(staff => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${staff.id}</td><td>${staff.name}</td><td>${staff.department}</td><td>${staff.role}</td>`;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        // Add staff
+        document.getElementById('addStaffForm').onsubmit = function(e) {
+            e.preventDefault();
+            const msgDiv = document.getElementById('addStaffMsg');
+            msgDiv.textContent = '';
+            fetch('/api/staff', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: document.getElementById('staffId').value.trim(),
+                    name: document.getElementById('staffName').value.trim(),
+                    department: document.getElementById('staffDept').value.trim(),
+                    role: document.getElementById('staffRole').value.trim()
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.style.color = 'green';
+                    msgDiv.textContent = data.message;
+                    this.reset(); // Clear the form fields
+                    fetchAllStaff();
+                } else {
+                    msgDiv.style.color = 'red';
+                    msgDiv.textContent = data.error || 'Error';
+                }
+            })
+            .catch(() => { msgDiv.style.color = 'red'; msgDiv.textContent = 'Server error'; });
+        };
+
+        // Remove staff
+        document.getElementById('removeStaffForm').onsubmit = function(e) {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to remove this staff member?')) return;
+            const staffId = document.getElementById('removeStaffId').value.trim();
+            const msgDiv = document.getElementById('removeStaffMsg');
+            msgDiv.textContent = '';
+            fetch('/api/staff/' + encodeURIComponent(staffId), {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.style.color = 'green';
+                    msgDiv.textContent = data.message;
+                    this.reset(); // Clear the form fields
+                    fetchAllStaff();
+                } else {
+                    msgDiv.style.color = 'red';
+                    msgDiv.textContent = data.error || 'Error';
+                }
+            })
+            .catch(() => { msgDiv.style.color = 'red'; msgDiv.textContent = 'Server error'; });
+        };
+
+        // Add student (you need to implement /api/student in your backend)
+        document.getElementById('addStudentForm').onsubmit = function(e) {
+            e.preventDefault();
+            const msgDiv = document.getElementById('addStudentMsg');
+            msgDiv.textContent = '';
+            fetch('/api/student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('studentName').value.trim(),
+                    roll_no: document.getElementById('rollNo').value.trim(),
+                    year: document.getElementById('year').value,
+                    department: document.getElementById('dept').value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.style.color = 'green';
+                    msgDiv.textContent = data.message;
+                    this.reset(); // Clear the form fields
+                    fetchAllStudents();
+                } else {
+                    msgDiv.style.color = 'red';
+                    msgDiv.textContent = data.error || 'Error';
+                }
+            })
+            .catch(() => { msgDiv.style.color = 'red'; msgDiv.textContent = 'Server error'; });
+        };
+
+        // Remove student (you need to implement /api/student/<roll_no> in your backend)
+        document.getElementById('removeStudentForm').onsubmit = function(e) {
+            e.preventDefault();
+            const rollNo = document.getElementById('removeRollNo').value.trim();
+            const msgDiv = document.getElementById('removeStudentMsg');
+            msgDiv.textContent = '';
+            fetch('/api/student/' + encodeURIComponent(rollNo), {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    msgDiv.style.color = 'green';
+                    msgDiv.textContent = data.message;
+                } else {
+                    msgDiv.style.color = 'red';
+                    msgDiv.textContent = data.error || 'Error';
+                }
+            })
+            .catch(() => { msgDiv.style.color = 'red'; msgDiv.textContent = 'Server error'; });
+        };
+
+        // Fetch and display all students
+        function fetchAllStudents() {
+            fetch('/api/students')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('studentTableBody');
+                    tbody.innerHTML = '';
+                    data.forEach(student => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${student.id}</td><td>${student.name}</td><td>${student.year}</td><td>${student.department}</td>`;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        // Sidebar navigation
+        function showSection(type, btn) {
+            // Hide all main and department sections
+            document.getElementById('staffSection').style.display = 'none';
+            document.getElementById('staffDetailsSection').style.display = 'none';
+            document.getElementById('studentSection').style.display = 'none';
+            document.getElementById('studentDetailsSection').style.display = 'none';
+            document.getElementById('AIMLSection').style.display = 'none';
+            document.getElementById('CSESection').style.display = 'none';
+            document.getElementById('ECESection').style.display = 'none';
+            document.getElementById('EEESection').style.display = 'none';
+            document.getElementById('ITSection').style.display = 'none';
+            document.getElementById('AIDSSection').style.display = 'none';
+            document.getElementById('CYBERSECURITYSection').style.display = 'none';
+            document.getElementById('MECHSection').style.display = 'none';
+            document.getElementById('CIVILSection').style.display = 'none';
+
+            // Remove active class from all main buttons
+            document.getElementById('staffBtn').classList.remove('active');
+            document.getElementById('staffDetailsBtn').classList.remove('active');
+            document.getElementById('studentBtn').classList.remove('active');
+            document.getElementById('studentDetailsBtn').classList.remove('active');
+
+            // Remove active from all sub-btns
+            document.querySelectorAll('.sidebar-sub-btn').forEach(b => b.classList.remove('active'));
+
+            // Close student submenu
+            document.getElementById('studentSubmenu').style.display = 'none';
+
+            // Show the right section and highlight the button
+            if (type === 'staff') {
+                document.getElementById('staffSection').style.display = '';
+                document.getElementById('staffBtn').classList.add('active');
+            } else if (type === 'staffDetails') {
+                document.getElementById('staffDetailsSection').style.display = '';
+                document.getElementById('staffDetailsBtn').classList.add('active');
+                fetchAllStaff();
+            } else if (type === 'student') {
+                document.getElementById('studentSection').style.display = '';
+                document.getElementById('studentBtn').classList.add('active');
+            } else if (type === 'studentDetails') {
+                document.getElementById('studentDetailsSection').style.display = '';
+                document.getElementById('studentDetailsBtn').classList.add('active');
+                fetchAllStudents();
+            }
+            if (btn && btn.classList.contains('sidebar-sub-btn')) btn.classList.add('active');
+        }
+
+        // Toggle submenu visibility
+        function toggleSubmenu(id, btn) {
+            // Only handle studentSubmenu
+            const submenus = ['studentSubmenu'];
+            submenus.forEach(sid => {
+                if (sid !== id) {
+                    document.getElementById(sid).style.display = 'none';
+                    const relatedBtn = document.getElementById('studentDetailsBtn');
+                    if (relatedBtn) relatedBtn.classList.remove('active');
+                }
+            });
+            // Toggle the selected submenu
+            const submenu = document.getElementById(id);
+            if (submenu.style.display === 'flex') {
+                submenu.style.display = 'none';
+                btn.classList.remove('active');
+            } else {
+                submenu.style.display = 'flex';
+                btn.classList.add('active');
+            }
+        }
+
+        // Optionally, highlight active sub-btn
+        function showDepartment(dept, btn) {
+            document.getElementById('staffSection').style.display = 'none';
+            document.getElementById('staffDetailsSection').style.display = 'none';
+            document.getElementById('studentSection').style.display = 'none';
+            document.getElementById('studentDetailsSection').style.display = 'none';
+            document.getElementById('AIMLSection').style.display = 'none';
+            document.getElementById('CSESection').style.display = 'none';
+            document.getElementById('ECESection').style.display = 'none';
+            document.getElementById('EEESection').style.display = 'none';
+            document.getElementById('ITSection').style.display = 'none';
+            document.getElementById('AIDSSection').style.display = 'none';
+            document.getElementById('CYBERSECURITYSection').style.display = 'none';
+            document.getElementById('MECHSection').style.display = 'none';
+            document.getElementById('CIVILSection').style.display = 'none';
+            document.getElementById('staffBtn').classList.remove('active');
+            document.getElementById('staffDetailsBtn').classList.remove('active');
+            document.getElementById('studentBtn').classList.remove('active');
+            document.getElementById('studentDetailsBtn').classList.remove('active');
+            
+            // API endpoint mapping for departments
+            const apiEndpoints = {
+                'AIML': '/api/students/aiml',
+                'CSE': '/api/students/cse',
+                'ECE': '/api/students/ece',
+                'EEE': '/api/students/eee',
+                'IT': '/api/students/it',
+                'AIDS': '/api/students/aids',
+                'CYBERSECURITY': '/api/students/cyber',
+                'MECH': '/api/students/mech',
+                'CIVIL': '/api/students/civil'
+            };
+            
+            const sectionId = dept + 'Section';
+            const tableBodyId = dept + 'TableBody';
+            
+            if (document.getElementById(sectionId) && apiEndpoints[dept]) {
+                document.getElementById(sectionId).style.display = '';
+                document.getElementById('staffBtn').classList.add('active');
+                
+                fetch(apiEndpoints[dept])
+                    .then(res => res.json())
+                    .then(data => {
+                        const tbody = document.getElementById(tableBodyId);
+                        tbody.innerHTML = '';
+                        data.forEach(student => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `<td>${student.id}</td><td>${student.name}</td><td>${student.year}</td><td>${student.department}</td>`;
+                            tbody.appendChild(tr);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching students:', error);
+                        const tbody = document.getElementById(tableBodyId);
+                        tbody.innerHTML = '<tr><td colspan="4">Error loading students</td></tr>';
+                    });
+            }
+            
+            document.querySelectorAll('.sidebar-sub-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        // Student filter
+        document.getElementById('studentFilterInput').addEventListener('input', function() {
+            const filter = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#studentTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+
+        // Initial load: show staff management
+        showSection('staff');
+    </script>
+</body>
+</html>

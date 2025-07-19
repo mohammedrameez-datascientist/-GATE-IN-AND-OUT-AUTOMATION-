@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gate Attendance - Gate Page</title>
+      <link rel="icon" type="image/png" href="{{ url_for('static', filename='header-logo.png') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(120deg, #a0c6ed 0%, #f5e6e6 100%);
+            background-size: 200% 200%;
+            animation: bgmove 8s ease-in-out infinite alternate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @keyframes bgmove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .corner-logo {
+            position: fixed;
+            left: 24px;
+            top: 24px;
+            width: 300px;
+            height: auto;
+            z-index: 0;
+            opacity: 0.96;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 8px #0002);
+        }
+        .container {
+            background: rgba(255,255,255,0.98);
+            padding: 36px 28px 28px 28px;
+            border-radius: 18px;
+            width: 100%;
+            max-width: 420px;
+            margin: 40px auto;
+            border: 1px solid #ddd;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(40px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        h2 {
+            color: #1976d2;
+            margin-bottom: 18px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .scanner-controls {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .scanner-controls button {
+            background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.07em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .scanner-controls button:disabled {
+            background: #b0bec5;
+            color: #fff;
+            cursor: not-allowed;
+        }
+        .scanner-controls button:hover:not(:disabled) {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 4px 16px #1976d230;
+        }
+        .manual-section {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .manual-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .manual-row input[type="text"] {
+            padding: 10px 14px;
+            border: 1.5px solid #b2dfdb;
+            border-radius: 6px;
+            font-size: 1.1em;
+            width: 140px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .manual-row input[type="text"]:focus {
+            border: 1.5px solid #1976d2;
+        }
+        .manual-row button {
+            padding: 10px 22px;
+            border-radius: 6px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px #1976d220;
+        }
+        #inBtn {
+            background: #388e3c;
+            color: #fff;
+        }
+        #inBtn:disabled {
+            background: #b0bec5;
+            color: #fff;
+        }
+        #inBtn:hover:not(:disabled) {
+            background: #2e7d32;
+            transform: translateY(-2px) scale(1.03);
+        }
+        #outBtn {
+            background: #d32f2f;
+            color: #fff;
+        }
+        #outBtn:disabled {
+            background: #b0bec5;
+            color: #fff;
+        }
+        #outBtn:hover:not(:disabled) {
+            background: #b71c1c;
+            transform: translateY(-2px) scale(1.03);
+        }
+        .msg {
+            margin-top: 18px;
+            color: #1976d2;
+            font-weight: 500;
+            min-height: 24px;
+            text-align: center;
+            transition: color 0.3s;
+        }
+        .msg.error {
+            color: #d32f2f;
+        }
+        .msg.success {
+            color: #388e3c;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 12px 2px 10px 2px; }
+            .corner-logo { width: 60px; left: 4px; top: 4px; }
+        }
+
+        .logout-btn {
+            position: fixed;
+            left: 24px;
+            bottom: 24px;
+            background: #000;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        .logout-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='college logo.png') }}" alt="College Logo" class="corner-logo">
+    <div class="container">
+        <h2>Gate Attendance</h2>
+        <div class="scanner-controls">
+            <button id="startBtn" onclick="startScanner()">Start Scanner</button>
+            <button id="endBtn" onclick="endScanner()" disabled>End Scanner</button>
+        </div>
+        <div class="manual-section">
+            <div class="manual-row">
+                <input type="text" id="manualId" placeholder="Enter Staff/Student ID">
+                <button id="inBtn" onclick="manualRegister('in')">IN</button>
+                <button id="outBtn" onclick="manualRegister('out')">OUT</button>
+            </div>
+            <div id="gateMsg" class="msg"></div>
+        </div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+    </a>
+    <script>
+let scannerRunning = false;
+
+function startScanner() {
+    scannerRunning = true;
+    document.getElementById('manualId').disabled = false;
+    document.getElementById('manualId').focus();
+    document.getElementById('inBtn').disabled = false;
+    document.getElementById('outBtn').disabled = false;
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('endBtn').disabled = false;
+    showGateMsg('Scanner started. Please scan a staff or student barcode.', false);
+}
+
+function endScanner() {
+    scannerRunning = false;
+    document.getElementById('manualId').disabled = true;
+    document.getElementById('inBtn').disabled = true;
+    document.getElementById('outBtn').disabled = true;
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('endBtn').disabled = true;
+    showGateMsg('Scanner stopped.', false);
+}
+
+function showGateMsg(msg, isError) {
+    const div = document.getElementById('gateMsg');
+    div.textContent = msg;
+    div.className = 'msg ' + (isError ? 'error' : 'success');
+    // Auto-hide success messages after 3 seconds
+    if (!isError) {
+        setTimeout(() => {
+            div.textContent = '';
+            div.className = 'msg';
+        }, 3000);
+    }
+}
+
+// Main handler for barcode/manual entry
+function handleScanOrManual() {
+    let id = document.getElementById('manualId').value.trim().replace(/[\r\n]+/g, '').toUpperCase();
+    if (!id) {
+        showGateMsg('Please enter an ID!', true);
+        return;
+    }
+
+    // Disable buttons while processing
+    document.getElementById('inBtn').disabled = true;
+    document.getElementById('outBtn').disabled = true;
+    
+    // First check staff collection
+    fetch('/api/staff')
+        .then(res => res.json())
+        .then(staffList => {
+            const staff = staffList.find(s => (s.id || '').trim().toUpperCase() === id);
+            if (staff) {
+                // Staff found, handle staff entry/exit
+                handleStaffEntryExit(staff);
+                return;
+            }
+            
+            // If not staff, check all student collections individually
+            checkAllStudentCollections(id);
+        })
+        .catch(err => {
+            showGateMsg('Error fetching staff data!', true);
+            document.getElementById('inBtn').disabled = false;
+            document.getElementById('outBtn').disabled = false;
+        });
+}
+
+// Check all student collections individually
+function checkAllStudentCollections(id) {
+    const studentCollections = [
+        '/api/students/aiml',
+        '/api/students/aids', 
+        '/api/students/it',
+        '/api/students/cse',
+        '/api/students/ece',
+        '/api/students/eee',
+        '/api/students/cyber',
+        '/api/students/mech',
+        '/api/students/civil'
+    ];
+    
+    let checkedCollections = 0;
+    let studentFound = null;
+    
+    studentCollections.forEach(collectionUrl => {
+        fetch(collectionUrl)
+            .then(res => res.json())
+            .then(studentList => {
+                const student = studentList.find(s => (s.id || '').trim().toUpperCase() === id);
+                if (student && !studentFound) {
+                    studentFound = student;
+                }
+                checkedCollections++;
+                
+                // If we've checked all collections or found a student
+                if (checkedCollections === studentCollections.length) {
+                    if (studentFound) {
+                        // Student found, handle student entry/exit
+                        handleStudentEntryExit(studentFound);
+                    } else {
+                        // Neither staff nor student found
+                        showGateMsg('ID not found in staff or student records!', true);
+                        document.getElementById('inBtn').disabled = false;
+                        document.getElementById('outBtn').disabled = false;
+                    }
+                }
+            })
+            .catch(err => {
+                checkedCollections++;
+                if (checkedCollections === studentCollections.length && !studentFound) {
+                    showGateMsg('Error checking student collections!', true);
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                }
+            });
+    });
+}
+
+// Handle staff entry/exit
+function handleStaffEntryExit(staff) {
+    // Check gate records for open entry
+    fetch('/api/gate/records')
+        .then(res => res.json())
+        .then(records => {
+            const openEntry = records.find(r => 
+                (r.staff_id || '').trim().toUpperCase() === staff.id.toUpperCase() && !r.exit_time
+            );
+            if (openEntry) {
+                // Register OUT
+                fetch('/api/gate/exit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        staff_id: staff.id
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showGateMsg(`OUT registered for ${staff.name} (${staff.id})`, false);
+                        document.getElementById('manualId').value = '';
+                    } else {
+                        showGateMsg(data.error || 'OUT registration failed!', true);
+                    }
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                })
+                .catch(err => {
+                    showGateMsg('Server error! Please try again.', true);
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                });
+            } else {
+                // Register IN
+                fetch('/api/gate/entry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        staff_id: staff.id,
+                        name: staff.name,
+                        department: staff.department,
+                        role: staff.role
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showGateMsg(`IN registered for ${staff.name} (${staff.id})`, false);
+                        document.getElementById('manualId').value = '';
+                    } else {
+                        showGateMsg(data.error || 'IN registration failed!', true);
+                    }
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                })
+                .catch(err => {
+                    showGateMsg('Server error! Please try again.', true);
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                });
+            }
+        })
+        .catch(err => {
+            showGateMsg('Error fetching gate records!', true);
+            document.getElementById('inBtn').disabled = false;
+            document.getElementById('outBtn').disabled = false;
+        });
+}
+
+// Handle student entry/exit
+function handleStudentEntryExit(student) {
+    // Check gate records for open entry
+    fetch('/api/gate/records')
+        .then(res => res.json())
+        .then(records => {
+            const openEntry = records.find(r => 
+                (r.staff_id || '').trim().toUpperCase() === student.id.toUpperCase() && !r.exit_time
+            );
+            if (openEntry) {
+                // Register OUT
+                fetch('/api/gate/exit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        staff_id: student.id
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showGateMsg(`OUT registered for ${student.name} (${student.id})`, false);
+                        document.getElementById('manualId').value = '';
+                    } else {
+                        showGateMsg(data.error || 'OUT registration failed!', true);
+                    }
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                })
+                .catch(err => {
+                    showGateMsg('Server error! Please try again.', true);
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                });
+            } else {
+                // Register IN
+                fetch('/api/gate/entry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        staff_id: student.id,
+                        name: student.name,
+                        department: student.department,
+                        role: 'student'
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showGateMsg(`IN registered for ${student.name} (${student.id})`, false);
+                        document.getElementById('manualId').value = '';
+                    } else {
+                        showGateMsg(data.error || 'IN registration failed!', true);
+                    }
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                })
+                .catch(err => {
+                    showGateMsg('Server error! Please try again.', true);
+                    document.getElementById('inBtn').disabled = false;
+                    document.getElementById('outBtn').disabled = false;
+                });
+            }
+        })
+        .catch(err => {
+            showGateMsg('Error fetching gate records!', true);
+            document.getElementById('inBtn').disabled = false;
+            document.getElementById('outBtn').disabled = false;
+        });
+}
+
+// Bind Enter key for barcode/manual input
+document.getElementById('manualId').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        handleScanOrManual();
+    }
+});
+
+// Optional: Bind IN/OUT buttons to always use the new logic
+document.getElementById('inBtn').onclick = handleScanOrManual;
+document.getElementById('outBtn').onclick = handleScanOrManual;
+
+// Initialize scanner state
+endScanner();
+    </script>
+</body>
+</html>
