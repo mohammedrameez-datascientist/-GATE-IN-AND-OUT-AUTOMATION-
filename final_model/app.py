@@ -10,8 +10,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Replace with your actual username and password
-uri = "mongodb+srv://rahulprakashlatha:jNPAVYjYAkZ16RTv@cluster0.kuyesmp.mongodb.net/?retryWrites=true&w=majority"
-
+uri = "your mongodb server link "
 # Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi('1'))
 
@@ -23,7 +22,7 @@ except Exception as e:
     print("Error connecting to MongoDB:", e)
 
 # Example: Access a collection
-db = client['ssec_gate_attendance']
+db = client['gate_attendance']
 staff_collection = db['staff']
 gate_records_collection = db['gate_records']
 gate_staff_collection = db['gate_staff']
